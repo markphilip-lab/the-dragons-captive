@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#11191b">
+    <title>The Dragon's Captive</title>
+    <link rel="icon" type="image/png" href="assets/game-icon.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main id="gameShell" class="game-shell">
+
+        <section id="menuScreen" class="screen menu-screen">
+            <div class="menu-scene" aria-hidden="true">
+                <div class="scene-grid"></div>
+                <div class="scene-glow"></div>
+                <div class="scene-platform"></div>
+
+                <img src="assets/characters/warrior.png" class="scene-sprite hero-knight" alt="">
+                <img src="assets/enemies/dragon.png" class="scene-sprite hero-dragon" alt="">
+                <img src="assets/characters/princess.png" class="scene-sprite hero-princess" alt="">
+                <img src="assets/enemies/bat.png" class="scene-sprite hero-bat" alt="">
+                <img src="assets/enemies/skeleton.png" class="scene-sprite hero-skeleton" alt="">
+            </div>
+
+            <header class="menu-header">
+                <a class="game-logo" href="#" aria-label="The Dragon's Captive home">
+                    <img src="assets/characters/game-icon.png" class="logo-image" alt="">
+                    <span class="logo-name">DUNGEON QUEST</span>
+                </a>
+
+                <span class="chapter-label">
+                    <span class="status-dot"></span>
+                    A PIXEL RPG ADVENTURE
+                </span>
+            </header>
+
+            <div class="menu-content">
+                <div class="title-eyebrow">
+                    <span class="eyebrow-line"></span>
+                    YOUR DESTINY AWAITS
+                    <span class="eyebrow-line"></span>
+                </div>
+
+                <h1 class="game-title">
+                    <span>THE DRAGON'S</span>
+                    <strong>CAPTIVE</strong>
+                </h1>
+
+                <p class="menu-description">
+                    A princess imprisoned. A kingdom in danger.
+                    One knight must face the darkness.
+                </p>
+
+                <button id="playButton" class="primary-button" type="button">
+                    <span class="button-play-icon">▶</span>
+                    <span>BEGIN ADVENTURE</span>
+                    <span class="button-arrow">→</span>
+                </button>
+
+                <p class="menu-hint">YOUR QUEST BEGINS HERE</p>
+            </div>
+
+            <div class="menu-bottom">
+                <div class="game-feature">
+                    <span class="feature-icon">I</span>
+                    <span>
+                        <strong>5 FLOORS</strong>
+                        <small>Explore the dungeon</small>
+                    </span>
+                </div>
+
+                <div class="menu-divider"></div>
+
+                <div class="game-feature">
+                    <span class="feature-icon">II</span>
+                    <span>
+                        <strong>FACE YOUR FEARS</strong>
+                        <small>Fight dangerous enemies</small>
+                    </span>
+                </div>
+
+                <div class="menu-divider"></div>
+
+                <div class="game-feature">
+                    <span class="feature-icon">III</span>
+                    <span>
+                        <strong>FINAL BOSS</strong>
+                        <small>Defeat the dragon</small>
+                    </span>
+                </div>
+            </div>
+
+            <div class="menu-controls">
+                <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> MOVE</span>
+                <span class="controls-separator">/</span>
+                <span><kbd>SPACE</kbd> ATTACK</span>
+                <span class="controls-separator">/</span>
+                <span>LEFT CLICK ATTACK</span>
+            </div>
+        </section>
+
+        <section id="gameScreen" class="screen game-screen hidden">
+            <div class="game-heading">
+                <div>
+                    <span class="game-heading-label">THE DRAGON'S CAPTIVE</span>
+                    <span id="floorDisplay" class="floor-badge">Floor 1</span>
+                </div>
+
+                <button id="musicToggleButton" class="music-button" type="button">
+                    MUSIC: ON
+                </button>
+            </div>
+
+            <div id="hud">
+                <div class="hud-stat">
+                    <span class="hud-label">HEALTH</span>
+                    <span id="healthDisplay">❤️ ❤️ ❤️</span>
+                </div>
+
+                <div class="hud-stat enemies-stat">
+                    <span class="hud-label">REMAINING ENEMIES</span>
+                    <span id="enemyDisplay">Enemies: 0</span>
+                </div>
+            </div>
+
+            <canvas id="gameCanvas" width="800" height="500">
+                Your browser does not support HTML canvas.
+            </canvas>
+
+            <div id="touchControls" aria-label="Mobile game controls">
+                <div class="touch-dpad">
+                    <button type="button" class="touch-up" data-touch-key="w" aria-label="Move up">▲</button>
+                    <button type="button" class="touch-left" data-touch-key="a" aria-label="Move left">◀</button>
+                    <button type="button" class="touch-right" data-touch-key="d" aria-label="Move right">▶</button>
+                    <button type="button" class="touch-down" data-touch-key="s" aria-label="Move down">▼</button>
+                </div>
+
+                <button type="button" id="touchAttackButton" aria-label="Attack enemy">
+                    <span class="attack-icon">⚔</span>
+                    <span>ATTACK</span>
+                </button>
+            </div>
+
+            <p id="message">Prepare for battle.</p>
+
+            <div class="game-footer">
+                <span>WASD — MOVE</span>
+                <span>SPACE / LEFT CLICK — ATTACK</span>
+            </div>
+        </section>
+
+        <section id="gameOverScreen" class="screen end-screen hidden">
+            <img src="assets/characters/game-icon.png" class="logo-image" alt="">
+            <p class="end-eyebrow">YOUR JOURNEY ENDS HERE</p>
+            <h1>GAME OVER</h1>
+            <p class="end-description">
+                The dungeon has claimed another warrior.
+                Gather your strength and try again.
+            </p>
+
+            <button id="retryButton" class="primary-button" type="button">
+                TRY AGAIN <span class="button-arrow">→</span>
+            </button>
+
+            <button id="menuButtonFromGameOver" class="secondary-button" type="button">
+                MAIN MENU
+            </button>
+        </section>
+
+        <section id="victoryScreen" class="screen end-screen victory-screen hidden">
+            <div class="end-icon victory-icon">★</div>
+            <p class="end-eyebrow">LEGENDARY ACHIEVEMENT</p>
+            <h1>VICTORY!</h1>
+            <p class="end-description">
+                The dragon has fallen. The princess is free.
+                A hero's legend will live forever.
+            </p>
+
+            <button id="playAgainButton" class="primary-button" type="button">
+                PLAY AGAIN <span class="button-arrow">→</span>
+            </button>
+
+            <button id="menuButtonFromVictory" class="secondary-button" type="button">
+                MAIN MENU
+            </button>
+        </section>
+
+        <footer class="site-footer">
+            <span>THE DRAGON'S CAPTIVE</span>
+            <span>AN 8-BIT DUNGEON ADVENTURE</span>
+        </footer>
+    </main>
+
+    <script src="js/collision.js"></script>
+    <script src="js/dungeon.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/enemies.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/music.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
