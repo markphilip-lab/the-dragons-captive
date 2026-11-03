@@ -1,4 +1,3 @@
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -138,13 +137,15 @@ function drawExitDoor() {
 }
 
 function updateHUD() {
-    let hearts = "";
+    const healthRatio = player.health / player.maxHealth;
 
-    for (let i = 0; i < player.maxHealth; i++) {
-        hearts += i < player.health ? "❤️ " : "🖤 ";
-    }
+    healthDisplay.style.width = (healthRatio * 100) + "%";
+    healthDisplay.style.backgroundColor =
+        healthRatio > 0.5 ? "#55bd68" :
+        healthRatio > 0.25 ? "#e0b84f" :
+        "#e34a4a";
 
-    healthDisplay.textContent = hearts;
+    healthDisplay.parentElement.setAttribute("aria-valuenow", player.health);
 
     enemyDisplay.textContent =
         "Enemies: " + countLivingEnemies();

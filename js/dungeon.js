@@ -1,4 +1,3 @@
-
 let currentFloor = 1;
 
 const TILE = 40;

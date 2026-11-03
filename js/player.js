@@ -1,12 +1,11 @@
-
 const player = {
     x: 60,
     y: 60,
     width: 40,
     height: 40,
     speed: 4,
-    maxHealth: 3,
-    health: 3,
+    maxHealth: 10,
+    health: 10,
     damageCooldown: 0,
     hitEffectTimer: 0,
     facing: "right",
@@ -18,10 +17,22 @@ const player = {
 
 const keys = {};
 
+const joystick = {
+    x: 0,
+    y: 0,
+    active: false,
+    pointerId: null
+};
+
 const warriorImage = new Image();
 warriorImage.src = "assets/characters/warrior.png";
 
 const playerCanvas = document.getElementById("gameCanvas");
+
+const joystickBase = document.getElementById("moveJoystick");
+const joystickKnob = document.getElementById("joystickKnob");
+
+const touchAttackButton = document.getElementById("touchAttackButton");
 
 function mapMovementKey(key) {
     const normalized = key.toLowerCase();
@@ -62,6 +73,8 @@ window.addEventListener("blur", function() {
     Object.keys(keys).forEach(function(key) {
         keys[key] = false;
     });
+
+    resetJoystick();
 });
 
 playerCanvas.addEventListener("mousedown", function(event) {
@@ -130,28 +143,40 @@ function getAttackArea() {
 function movePlayer() {
     if (gameState !== "playing") return;
 
-    let newX = player.x;
-    let newY = player.y;
+    let moveX = 0;
+    let moveY = 0;
 
-    if (keys["a"]) {
-        newX -= player.speed;
-        player.facing = "left";
+    if (keys["a"]) moveX -= 1;
+    if (keys["d"]) moveX += 1;
+    if (keys["w"]) moveY -= 1;
+    if (keys["s"]) moveY += 1;
+
+    moveX += joystick.x;
+    moveY += joystick.y;
+
+    const magnitude = Math.sqrt(
+        moveX * moveX + moveY * moveY
+    );
+
+    if (magnitude > 1) {
+        moveX /= magnitude;
+        moveY /= magnitude;
     }
 
-    if (keys["d"]) {
-        newX += player.speed;
+    if (moveX < -0.15) {
+        player.facing = "left";
+    } else if (moveX > 0.15) {
         player.facing = "right";
     }
 
-    if (keys["w"]) {
-        newY -= player.speed;
+    if (moveY < -0.15) {
         player.facing = "up";
-    }
-
-    if (keys["s"]) {
-        newY += player.speed;
+    } else if (moveY > 0.15) {
         player.facing = "down";
     }
+
+    const newX = player.x + moveX * player.speed;
+    const newY = player.y + moveY * player.speed;
 
     const horizontal = {
         x: newX,
@@ -200,6 +225,94 @@ function movePlayer() {
     }
 }
 
+function updateJoystickPosition(clientX, clientY) {
+    const rect = joystickBase.getBoundingClientRect();
+
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const maxDistance = Math.max(
+        1,
+        (rect.width - joystickKnob.offsetWidth) / 2 - 6
+    );
+
+    let dx = clientX - centerX;
+    let dy = clientY - centerY;
+
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance > maxDistance) {
+        dx = (dx / distance) * maxDistance;
+        dy = (dy / distance) * maxDistance;
+    }
+
+    joystick.x = dx / maxDistance;
+    joystick.y = dy / maxDistance;
+
+    joystickKnob.style.left = "calc(50% + " + dx + "px)";
+    joystickKnob.style.top = "calc(50% + " + dy + "px)";
+}
+
+function resetJoystick() {
+    joystick.x = 0;
+    joystick.y = 0;
+    joystick.active = false;
+    joystick.pointerId = null;
+
+    if (joystickKnob) {
+        joystickKnob.style.left = "50%";
+        joystickKnob.style.top = "50%";
+    }
+}
+
+if (joystickBase && joystickKnob) {
+    joystickBase.addEventListener("pointerdown", function(event) {
+        event.preventDefault();
+
+        if (gameState !== "playing") return;
+
+        joystick.active = true;
+        joystick.pointerId = event.pointerId;
+
+        try {
+            joystickBase.setPointerCapture(event.pointerId);
+        } catch (error) {
+            resetJoystick();
+            return;
+        }
+
+        updateJoystickPosition(event.clientX, event.clientY);
+    });
+
+    joystickBase.addEventListener("pointermove", function(event) {
+        if (
+            !joystick.active ||
+            event.pointerId !== joystick.pointerId
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        updateJoystickPosition(event.clientX, event.clientY);
+    });
+
+    joystickBase.addEventListener("pointerup", function(event) {
+        if (event.pointerId !== joystick.pointerId) return;
+
+        event.preventDefault();
+        resetJoystick();
+    });
+
+    joystickBase.addEventListener("pointercancel", function() {
+        resetJoystick();
+    });
+
+    joystickBase.addEventListener("lostpointercapture", function() {
+        resetJoystick();
+    });
+}
+
 function damagePlayer(amount = 1) {
     if (player.damageCooldown > 0 || player.health <= 0) {
         return;
@@ -229,6 +342,8 @@ function resetPlayer() {
     Object.keys(keys).forEach(function(key) {
         keys[key] = false;
     });
+
+    resetJoystick();
 }
 
 function drawAttackSlash(drawX, drawY) {
@@ -311,7 +426,12 @@ function drawDamageEffect(drawX, drawY) {
 
     ctx.fillStyle = "#ff3838";
 
-    ctx.fillRect(drawX - 5 - spread, drawY + 10 - spread, 4, 4);
+    ctx.fillRect(
+        drawX - 5 - spread,
+        drawY + 10 - spread,
+        4,
+        4
+    );
 
     ctx.fillRect(
         drawX + player.width + 1 + spread,
@@ -385,65 +505,28 @@ function drawPlayer() {
     drawDamageEffect(drawX, drawY);
 }
 
-function releaseTouchDirection(button, key) {
-    keys[key] = false;
-    button.classList.remove("pressed");
-}
-
-document.querySelectorAll("[data-touch-key]").forEach(function(button) {
-    const key = button.dataset.touchKey;
-
-    button.addEventListener("pointerdown", function(event) {
+if (touchAttackButton) {
+    touchAttackButton.addEventListener("pointerdown", function(event) {
         event.preventDefault();
 
         if (gameState !== "playing") return;
 
-        keys[key] = true;
-        button.classList.add("pressed");
+        touchAttackButton.classList.add("pressed");
 
         try {
-            button.setPointerCapture(event.pointerId);
+            touchAttackButton.setPointerCapture(event.pointerId);
         } catch (error) {
-            releaseTouchDirection(button, key);
+            touchAttackButton.classList.remove("pressed");
         }
+
+        attackPlayer();
     });
 
-    button.addEventListener("pointerup", function(event) {
-        event.preventDefault();
-        releaseTouchDirection(button, key);
-    });
-
-    button.addEventListener("pointercancel", function() {
-        releaseTouchDirection(button, key);
-    });
-
-    button.addEventListener("lostpointercapture", function() {
-        releaseTouchDirection(button, key);
-    });
-});
-
-const touchAttackButton = document.getElementById("touchAttackButton");
-
-touchAttackButton.addEventListener("pointerdown", function(event) {
-    event.preventDefault();
-
-    if (gameState !== "playing") return;
-
-    touchAttackButton.classList.add("pressed");
-
-    try {
-        touchAttackButton.setPointerCapture(event.pointerId);
-    } catch (error) {
+    function releaseTouchAttack() {
         touchAttackButton.classList.remove("pressed");
     }
 
-    attackPlayer();
-});
-
-function releaseTouchAttack() {
-    touchAttackButton.classList.remove("pressed");
+    touchAttackButton.addEventListener("pointerup", releaseTouchAttack);
+    touchAttackButton.addEventListener("pointercancel", releaseTouchAttack);
+    touchAttackButton.addEventListener("lostpointercapture", releaseTouchAttack);
 }
-
-touchAttackButton.addEventListener("pointerup", releaseTouchAttack);
-touchAttackButton.addEventListener("pointercancel", releaseTouchAttack);
-touchAttackButton.addEventListener("lostpointercapture", releaseTouchAttack);

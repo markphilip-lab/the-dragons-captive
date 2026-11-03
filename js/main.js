@@ -1,4 +1,3 @@
-
 const menuScreen = document.getElementById("menuScreen");
 const gameScreen = document.getElementById("gameScreen");
 const gameOverScreen = document.getElementById("gameOverScreen");
@@ -17,6 +16,7 @@ const menuButtonFromVictory =
     document.getElementById("menuButtonFromVictory");
 
 const healthDisplay = document.getElementById("healthDisplay");
+const healthText = document.getElementById("healthText");
 const enemyDisplay = document.getElementById("enemyDisplay");
 const floorDisplay = document.getElementById("floorDisplay");
 const messageElement = document.getElementById("message");

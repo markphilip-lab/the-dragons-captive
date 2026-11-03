@@ -19,6 +19,7 @@ let enemies = [];
 let dragon = null;
 
 let princess = null;
+let enemyWakeTimer = 0;
 
 function makeEnemy(type, x, y, floor, health = 3) {
     const settings = {
@@ -73,6 +74,7 @@ function createEnemiesForFloor(floor) {
     enemies = [];
     dragon = null;
     princess = null;
+    enemyWakeTimer = 100;
 
     if (floor === 1) {
         enemies.push(
@@ -87,9 +89,9 @@ function createEnemiesForFloor(floor) {
     
     if (floor === 2) {
         enemies.push(
-            makeEnemy("bat", 250, 70, 2),
-            makeEnemy("bat", 450, 70, 2),
-            makeEnemy("bat", 650, 100, 2),
+            makeEnemy("bat", 320, 70, 2),
+            makeEnemy("bat", 500, 70, 2),
+            makeEnemy("bat", 680, 100, 2),
             makeEnemy("bat", 150, 350, 2),
             makeEnemy("bat", 420, 350, 2),
             makeEnemy("bat", 650, 350, 2)
@@ -98,42 +100,47 @@ function createEnemiesForFloor(floor) {
 
     if (floor === 3) {
         enemies.push(
-            makeEnemy("bat", 100, 150, 3),
-            makeEnemy("bat", 300, 70, 3),
-            makeEnemy("bat", 500, 150, 3),
-            makeEnemy("bat", 680, 150, 3),
-            makeEnemy("bat", 300, 400, 3),
-            makeEnemy("bat", 600, 400, 3)
+            makeEnemy("bat", 350, 70, 3),
+            makeEnemy("bat", 650, 70, 3),
+            makeEnemy("bat", 700, 180, 3),
+            makeEnemy("bat", 400, 300, 3),
+            makeEnemy("bat", 650, 400, 3),
+            makeEnemy("bat", 100, 400, 3)
         );
     }
 
     if (floor === 4) {
         enemies.push(
-            makeEnemy("bat", 80, 100, 4),
-            makeEnemy("bat", 250, 70, 4),
-            makeEnemy("skeleton", 400, 80, 4),
-            makeEnemy("skeleton", 600, 80, 4),
-            makeEnemy("bat", 100, 350, 4),
-            makeEnemy("skeleton", 350, 350, 4),
-            makeEnemy("bat", 650, 350, 4)
+            makeEnemy("bat", 350, 60, 4),
+            makeEnemy("bat", 560, 60, 4),
+            makeEnemy("skeleton", 700, 90, 4),
+            makeEnemy("skeleton", 350, 220, 4),
+            makeEnemy("bat", 700, 320, 4),
+            makeEnemy("skeleton", 100, 400, 4),
+            makeEnemy("bat", 350, 400, 4)
         );
     }
 
     if (floor === 5) {
         enemies.push(
-            makeEnemy("skeleton", 100, 160, 5),
-            makeEnemy("skeleton", 650, 160, 5),
-            makeEnemy("skeleton", 100, 300, 5),
-            makeEnemy("skeleton", 650, 300, 5)
+            makeEnemy("skeleton", 90, 370, 5),
+            makeEnemy("skeleton", 710, 70, 5),
+            makeEnemy("skeleton", 680, 300, 5),
+            makeEnemy("skeleton", 350, 400, 5)
         );
 
-        dragon = makeEnemy("dragon", 500, 190, 5, 15);
+        dragon = makeEnemy("dragon", 500, 190, 5, 10);
         enemies.push(dragon);
     }
 }
 
 function moveEnemies() {
     if (gameState !== "playing") return;
+
+    if (enemyWakeTimer > 0) {
+        enemyWakeTimer--;
+        return;
+    }
 
     const AGGRO_RANGE = 160;
 
