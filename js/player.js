@@ -1,8 +1,8 @@
 const player = {
     x: 60,
     y: 60,
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     speed: 4,
     maxHealth: 10,
     health: 10,
