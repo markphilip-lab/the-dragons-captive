@@ -1,3 +1,5 @@
+// Main menu and screen controls
+
 const menuScreen = document.getElementById("menuScreen");
 const gameScreen = document.getElementById("gameScreen");
 const gameOverScreen = document.getElementById("gameOverScreen");
@@ -15,14 +17,20 @@ const playAgainButton =
 const menuButtonFromVictory =
     document.getElementById("menuButtonFromVictory");
 
-const healthDisplay = document.getElementById("healthDisplay");
-const healthText = document.getElementById("healthText");
-const enemyDisplay = document.getElementById("enemyDisplay");
-const floorDisplay = document.getElementById("floorDisplay");
-const messageElement = document.getElementById("message");
-
 const musicToggleButton =
     document.getElementById("musicToggleButton");
+
+const healthDisplay =
+    document.getElementById("healthDisplay");
+
+const enemyDisplay =
+    document.getElementById("enemyDisplay");
+
+const floorDisplay =
+    document.getElementById("floorDisplay");
+
+const messageElement =
+    document.getElementById("message");
 
 function hideAllScreens() {
     menuScreen.classList.add("hidden");
@@ -43,12 +51,14 @@ function showMainMenu() {
 }
 
 function updateMusicButton() {
+    if (!musicToggleButton) return;
+
     musicToggleButton.textContent =
         musicEnabled ? "MUSIC: ON" : "MUSIC: OFF";
 }
 
 playButton.addEventListener("click", startGame);
-retryButton.addEventListener("click", retryGame);
+retryButton.addEventListener("click", startGame);
 playAgainButton.addEventListener("click", startGame);
 
 menuButtonFromGameOver.addEventListener(
@@ -62,10 +72,8 @@ menuButtonFromVictory.addEventListener(
 );
 
 musicToggleButton.addEventListener("click", function() {
-    const enabled = toggleBackgroundMusic();
-
-    musicToggleButton.textContent =
-        enabled ? "MUSIC: ON" : "MUSIC: OFF";
+    toggleBackgroundMusic();
+    updateMusicButton();
 });
 
 updateMusicButton();

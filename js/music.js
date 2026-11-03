@@ -1,194 +1,155 @@
-let musicEnabled = true;
 let musicContext = null;
 let musicMaster = null;
 let musicTimer = null;
+
+let musicEnabled = true;
+let musicPlaying = false;
 let musicStep = 0;
 
-const musicTempo = 360;
-
-const dungeonMelody = [
-    74, null, 77, null, 81, 79, 77, null,
-    72, null, 74, 77, null, 70, 69, null,
-    74, null, 77, 81, 84, null, 81, 79,
-    77, null, 74, 72, null, 69, 70, null
+const melody = [
+    196, 220, 261.63, 220,
+    174.61, 196, 220, 164.81,
+    196, 261.63, 293.66, 261.63,
+    174.61, 196, 164.81, 146.83
 ];
 
-const dungeonChords = [
-    [50, 53, 57],
-    [46, 50, 53],
-    [41, 45, 48],
-    [48, 52, 55]
+const bassNotes = [
+    65.41, 65.41, 73.42, 73.42,
+    58.27, 58.27, 65.41, 65.41
 ];
-
-const dungeonBass = [38, 34, 41, 36];
-
-function midiToFrequency(note) {
-    return 440 * Math.pow(2, (note - 69) / 12);
-}
 
 function initializeMusic() {
-    if (musicContext) return true;
+    const button = document.getElementById("musicToggleButton");
+
+    if (button) {
+        button.textContent = musicEnabled ? "MUSIC: ON" : "MUSIC: OFF";
+    }
+}
+
+function createMusicContext() {
+    if (musicContext) return;
 
     const AudioContextClass =
         window.AudioContext || window.webkitAudioContext;
 
-    if (!AudioContextClass) return false;
+    if (!AudioContextClass) {
+        console.warn("Web Audio API is not supported.");
+        return;
+    }
 
     musicContext = new AudioContextClass();
+
     musicMaster = musicContext.createGain();
-
-    musicMaster.gain.value = 0;
+    musicMaster.gain.value = 0.35;
     musicMaster.connect(musicContext.destination);
-
-    return true;
 }
 
-function playMusicTone(
-    frequency,
-    duration,
-    type,
-    volume,
-    startTime,
-    cutoff = 2600
-) {
-    if (!musicContext || !musicMaster || !frequency) return;
-
-    const oscillator = musicContext.createOscillator();
-    const envelope = musicContext.createGain();
-    const filter = musicContext.createBiquadFilter();
-
-    oscillator.type = type;
-    oscillator.frequency.setValueAtTime(frequency, startTime);
-
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(cutoff, startTime);
-
-    envelope.gain.setValueAtTime(0.001, startTime);
-    envelope.gain.linearRampToValueAtTime(
-        volume,
-        startTime + 0.08
-    );
-    envelope.gain.exponentialRampToValueAtTime(
-        0.001,
-        startTime + duration
-    );
-
-    oscillator.connect(filter);
-    filter.connect(envelope);
-    envelope.connect(musicMaster);
-
-    oscillator.start(startTime);
-    oscillator.stop(startTime + duration + 0.05);
-}
-
-function playDungeonPad(chord, startTime) {
-    chord.forEach(function(note) {
-        playMusicTone(
-            midiToFrequency(note),
-            2.65,
-            "sine",
-            0.035,
-            startTime,
-            1100
-        );
-    });
-}
-
-function playMusicStep() {
+function playMusicNote(frequency, duration, volume, type) {
     if (!musicContext || !musicMaster) return;
 
-    const now = musicContext.currentTime + 0.04;
-    const melodyNote = dungeonMelody[musicStep];
+    const oscillator = musicContext.createOscillator();
+    const gain = musicContext.createGain();
 
-    if (melodyNote !== null) {
-        playMusicTone(
-            midiToFrequency(melodyNote),
-            0.29,
-            "triangle",
-            0.085,
-            now,
-            1900
-        );
-    }
+    const now = musicContext.currentTime;
 
-    if (musicStep % 8 === 0) {
-        const bar = Math.floor(musicStep / 8);
-        const chord = dungeonChords[bar % dungeonChords.length];
-        const bassNote = dungeonBass[bar % dungeonBass.length];
+    oscillator.type = type || "triangle";
+    oscillator.frequency.setValueAtTime(frequency, now);
 
-        playDungeonPad(chord, now);
-
-        playMusicTone(
-            midiToFrequency(bassNote),
-            1.25,
-            "triangle",
-            0.14,
-            now,
-            500
-        );
-    }
-
-    if (musicStep % 8 === 4) {
-        const bassNote =
-            dungeonBass[Math.floor(musicStep / 8) % dungeonBass.length];
-
-        playMusicTone(
-            midiToFrequency(bassNote + 12),
-            0.55,
-            "sine",
-            0.045,
-            now,
-            650
-        );
-    }
-
-    musicStep = (musicStep + 1) % dungeonMelody.length;
-}
-
-function startBackgroundMusic() {
-    if (!musicEnabled || !initializeMusic()) return;
-
-    if (musicContext.state === "suspended") {
-        musicContext.resume();
-    }
-
-    musicMaster.gain.setTargetAtTime(
-        0.42,
-        musicContext.currentTime,
-        0.3
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(volume, now + 0.04);
+    gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        now + duration
     );
 
-    if (musicTimer !== null) return;
+    oscillator.connect(gain);
+    gain.connect(musicMaster);
 
+    oscillator.start(now);
+    oscillator.stop(now + duration + 0.05);
+}
+
+function playDungeonMusicStep() {
+    if (!musicContext || !musicPlaying) return;
+
+    const melodyNote = melody[musicStep % melody.length];
+    const bassNote = bassNotes[musicStep % bassNotes.length];
+
+    playMusicNote(
+        melodyNote,
+        0.8,
+        0.09,
+        "triangle"
+    );
+
+    if (musicStep % 2 === 0) {
+        playMusicNote(
+            bassNote,
+            1.2,
+            0.12,
+            "sine"
+        );
+    }
+
+    if (musicStep % 4 === 0) {
+        playMusicNote(
+            melodyNote * 1.5,
+            1.8,
+            0.025,
+            "sine"
+        );
+    }
+
+    musicStep++;
+}
+
+async function startBackgroundMusic() {
+    if (!musicEnabled || musicPlaying) return;
+
+    createMusicContext();
+
+    if (!musicContext) return;
+
+    try {
+        await musicContext.resume();
+    } catch (error) {
+        console.warn("Unable to start background music:", error);
+        return;
+    }
+
+    musicPlaying = true;
     musicStep = 0;
-    playMusicStep();
 
-    musicTimer = setInterval(playMusicStep, musicTempo);
+    playDungeonMusicStep();
+
+    musicTimer = setInterval(function() {
+        playDungeonMusicStep();
+    }, 450);
 }
 
 function stopBackgroundMusic() {
+    musicPlaying = false;
+
     if (musicTimer !== null) {
         clearInterval(musicTimer);
         musicTimer = null;
-    }
-
-    if (musicContext && musicMaster) {
-        musicMaster.gain.setTargetAtTime(
-            0,
-            musicContext.currentTime,
-            0.12
-        );
     }
 }
 
 function toggleBackgroundMusic() {
     musicEnabled = !musicEnabled;
 
+    const button = document.getElementById("musicToggleButton");
+
+    if (button) {
+        button.textContent = musicEnabled ? "MUSIC: ON" : "MUSIC: OFF";
+    }
+
     if (musicEnabled) {
         startBackgroundMusic();
     } else {
         stopBackgroundMusic();
     }
-
-    return musicEnabled;
 }
+
+initializeMusic();

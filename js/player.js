@@ -28,10 +28,8 @@ const warriorImage = new Image();
 warriorImage.src = "assets/characters/warrior.png";
 
 const playerCanvas = document.getElementById("gameCanvas");
-
 const joystickBase = document.getElementById("moveJoystick");
 const joystickKnob = document.getElementById("joystickKnob");
-
 const touchAttackButton = document.getElementById("touchAttackButton");
 
 function mapMovementKey(key) {
@@ -225,6 +223,8 @@ function movePlayer() {
     }
 }
 
+/* Virtual joystick */
+
 function updateJoystickPosition(clientX, clientY) {
     const rect = joystickBase.getBoundingClientRect();
 
@@ -313,6 +313,8 @@ if (joystickBase && joystickKnob) {
     });
 }
 
+/* Player damage */
+
 function damagePlayer(amount = 1) {
     if (player.damageCooldown > 0 || player.health <= 0) {
         return;
@@ -326,6 +328,8 @@ function damagePlayer(amount = 1) {
         endGame();
     }
 }
+
+/* Reset player */
 
 function resetPlayer() {
     player.x = 60;
@@ -345,6 +349,8 @@ function resetPlayer() {
 
     resetJoystick();
 }
+
+/* Attack animation */
 
 function drawAttackSlash(drawX, drawY) {
     if (!player.attacking) return;
@@ -405,6 +411,8 @@ function drawAttackSlash(drawX, drawY) {
     ctx.restore();
 }
 
+/* Damage animation */
+
 function drawDamageEffect(drawX, drawY) {
     if (player.hitEffectTimer <= 0) return;
 
@@ -463,6 +471,8 @@ function drawDamageEffect(drawX, drawY) {
     player.hitEffectTimer--;
 }
 
+/* Draw player */
+
 function drawPlayer() {
     const blinking =
         player.damageCooldown > 0 &&
@@ -504,6 +514,8 @@ function drawPlayer() {
     drawAttackSlash(drawX, drawY);
     drawDamageEffect(drawX, drawY);
 }
+
+/* Mobile attack button */
 
 if (touchAttackButton) {
     touchAttackButton.addEventListener("pointerdown", function(event) {

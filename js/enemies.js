@@ -15,9 +15,7 @@ const princessImage = new Image();
 princessImage.src = "assets/characters/princess.png";
 
 let enemies = [];
-
 let dragon = null;
-
 let princess = null;
 let enemyWakeTimer = 0;
 
@@ -86,7 +84,7 @@ function createEnemiesForFloor(floor) {
             makeEnemy("bat", 650, 400, 1)
         );
     }
-    
+
     if (floor === 2) {
         enemies.push(
             makeEnemy("bat", 320, 70, 2),
@@ -192,7 +190,9 @@ function moveEnemies() {
             height: enemy.height
         };
 
-        let blocked = walls.some(wall => isColliding(horizontal, wall));
+        let blocked = walls.some(function(wall) {
+            return isColliding(horizontal, wall);
+        });
 
         if (!blocked && isInsideDungeon(horizontal)) {
             enemy.x += stepX;
@@ -205,7 +205,9 @@ function moveEnemies() {
             height: enemy.height
         };
 
-        blocked = walls.some(wall => isColliding(vertical, wall));
+        blocked = walls.some(function(wall) {
+            return isColliding(vertical, wall);
+        });
 
         if (!blocked && isInsideDungeon(vertical)) {
             enemy.y += stepY;
@@ -232,6 +234,7 @@ function checkEnemyDamage() {
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         const angleToPlayer = Math.atan2(dy, dx);
+
         const difference = Math.atan2(
             Math.sin(angleToPlayer - enemy.facingAngle),
             Math.cos(angleToPlayer - enemy.facingAngle)
@@ -296,19 +299,42 @@ function allEnemiesDefeated() {
 function drawEnemy(enemy) {
     if (enemy.type === "bat") {
         if (batImage.complete && batImage.naturalWidth > 0) {
-            ctx.drawImage(batImage, enemy.x, enemy.y, enemy.width, enemy.height);
+            ctx.drawImage(
+                batImage,
+                enemy.x,
+                enemy.y,
+                enemy.width,
+                enemy.height
+            );
         } else {
             ctx.fillStyle = "#a944ff";
-            ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+            ctx.fillRect(
+                enemy.x,
+                enemy.y,
+                enemy.width,
+                enemy.height
+            );
         }
     }
 
     if (enemy.type === "skeleton") {
         if (skeletonImage.complete && skeletonImage.naturalWidth > 0) {
-            ctx.drawImage(skeletonImage, enemy.x, enemy.y, enemy.width, enemy.height);
+            ctx.drawImage(
+                skeletonImage,
+                enemy.x,
+                enemy.y,
+                enemy.width,
+                enemy.height
+            );
         } else {
             ctx.fillStyle = "#ddd";
-            ctx.fillRect(enemy.x + 10, enemy.y, 28, 48);
+            ctx.fillRect(
+                enemy.x + 10,
+                enemy.y,
+                28,
+                48
+            );
+
             ctx.fillStyle = "#111";
             ctx.fillRect(enemy.x + 15, enemy.y + 10, 6, 6);
             ctx.fillRect(enemy.x + 28, enemy.y + 10, 6, 6);
@@ -317,24 +343,48 @@ function drawEnemy(enemy) {
 
     if (enemy.type === "dragon") {
         if (dragonImage.complete && dragonImage.naturalWidth > 0) {
-            ctx.drawImage(dragonImage, enemy.x, enemy.y, enemy.width, enemy.height);
+            ctx.drawImage(
+                dragonImage,
+                enemy.x,
+                enemy.y,
+                enemy.width,
+                enemy.height
+            );
         } else {
             ctx.fillStyle = "#b52b35";
-            ctx.fillRect(enemy.x + 15, enemy.y + 25, 80, 65);
+            ctx.fillRect(
+                enemy.x + 15,
+                enemy.y + 25,
+                80,
+                65
+            );
+
             ctx.fillStyle = "#e24b55";
-            ctx.fillRect(enemy.x + 35, enemy.y, 40, 40);
+            ctx.fillRect(
+                enemy.x + 35,
+                enemy.y,
+                40,
+                40
+            );
+
             ctx.fillStyle = "#ffd84d";
             ctx.fillRect(enemy.x + 45, enemy.y + 12, 8, 8);
             ctx.fillRect(enemy.x + 62, enemy.y + 12, 8, 8);
         }
     }
 
-    // Health bar
     drawEnemyAttackEffect(enemy);
+
     ctx.fillStyle = "#111";
-    ctx.fillRect(enemy.x, enemy.y - 8, enemy.width, 5);
+    ctx.fillRect(
+        enemy.x,
+        enemy.y - 8,
+        enemy.width,
+        5
+    );
 
     ctx.fillStyle = enemy.type === "dragon" ? "#ff4444" : "#e33";
+
     ctx.fillRect(
         enemy.x,
         enemy.y - 8,
@@ -356,6 +406,7 @@ function drawEnemyAttackEffect(enemy) {
     ctx.translate(centerX, centerY);
     ctx.rotate(enemy.facingAngle);
 
+    // Bat bite animation
     if (enemy.type === "bat") {
         const jawOpen = Math.max(
             1,
@@ -363,7 +414,6 @@ function drawEnemyAttackEffect(enemy) {
         );
 
         ctx.globalAlpha = 0.95;
-
         ctx.fillStyle = "#25132f";
 
         ctx.beginPath();
@@ -401,9 +451,19 @@ function drawEnemyAttackEffect(enemy) {
         ctx.fill();
 
         ctx.fillStyle = "#fff0d5";
+        ctx.fillRect(
+            34,
+            -jawOpen + 1,
+            3,
+            Math.min(4, jawOpen)
+        );
 
-        ctx.fillRect(34, -jawOpen + 1, 3, Math.min(4, jawOpen));
-        ctx.fillRect(43, jawOpen - Math.min(4, jawOpen), 3, Math.min(4, jawOpen));
+        ctx.fillRect(
+            43,
+            jawOpen - Math.min(4, jawOpen),
+            3,
+            Math.min(4, jawOpen)
+        );
 
         if (progress > 0.75) {
             ctx.fillStyle = "#ff557e";
@@ -412,6 +472,7 @@ function drawEnemyAttackEffect(enemy) {
         }
     }
 
+    // Skeleton sword swing
     if (enemy.type === "skeleton") {
         ctx.globalAlpha = 0.95;
 
@@ -419,7 +480,9 @@ function drawEnemyAttackEffect(enemy) {
         ctx.lineWidth = 9;
         ctx.beginPath();
         ctx.arc(
-            20, 0, 31,
+            20,
+            0,
+            31,
             -1.25 + progress * 0.5,
             1.0 + progress * 0.5
         );
@@ -429,7 +492,9 @@ function drawEnemyAttackEffect(enemy) {
         ctx.lineWidth = 5;
         ctx.beginPath();
         ctx.arc(
-            20, 0, 31,
+            20,
+            0,
+            31,
             -1.15 + progress * 0.5,
             0.85 + progress * 0.5
         );
@@ -439,7 +504,9 @@ function drawEnemyAttackEffect(enemy) {
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(
-            20, 0, 25,
+            20,
+            0,
+            25,
             -1.0 + progress * 0.5,
             0.65 + progress * 0.5
         );
@@ -450,11 +517,13 @@ function drawEnemyAttackEffect(enemy) {
         ctx.fillRect(48, 2, 3, 3);
     }
 
+    // Dragon fire attack
     if (enemy.type === "dragon") {
         const reach = 65 + 45 * Math.sin(progress * Math.PI);
 
         ctx.globalAlpha = 0.3;
         ctx.fillStyle = "#ff3825";
+
         ctx.beginPath();
         ctx.moveTo(37, -19);
         ctx.lineTo(reach, -27);
@@ -466,6 +535,7 @@ function drawEnemyAttackEffect(enemy) {
 
         ctx.globalAlpha = 0.8;
         ctx.fillStyle = "#d84220";
+
         ctx.beginPath();
         ctx.moveTo(40, -14);
         ctx.lineTo(reach - 6, -17);
@@ -477,10 +547,20 @@ function drawEnemyAttackEffect(enemy) {
 
         ctx.globalAlpha = 1;
         ctx.fillStyle = "#ff9a32";
-        ctx.fillRect(44, -8, Math.max(8, reach - 52), 16);
+        ctx.fillRect(
+            44,
+            -8,
+            Math.max(8, reach - 52),
+            16
+        );
 
         ctx.fillStyle = "#ffdb71";
-        ctx.fillRect(47, -3, Math.max(5, reach - 65), 6);
+        ctx.fillRect(
+            47,
+            -3,
+            Math.max(5, reach - 65),
+            6
+        );
 
         ctx.fillStyle = "#fff0ac";
         ctx.fillRect(reach - 5, -3, 5, 5);
@@ -492,6 +572,7 @@ function drawEnemyAttackEffect(enemy) {
 function drawEnemies() {
     for (const enemy of enemies) {
         if (!enemy.alive || enemy.floor !== currentFloor) continue;
+
         drawEnemy(enemy);
     }
 
@@ -502,6 +583,7 @@ function drawEnemies() {
 
 function defeatDragon() {
     dragon.alive = false;
+
     princess = {
         x: 560,
         y: 280,
@@ -546,6 +628,7 @@ function drawPrincess() {
     ctx.fillStyle = "white";
     ctx.font = "12px Arial";
     ctx.textAlign = "center";
+
     ctx.fillText(
         "PRINCESS",
         princess.x + princess.width / 2,

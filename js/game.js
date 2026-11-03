@@ -140,12 +140,16 @@ function updateHUD() {
     const healthRatio = player.health / player.maxHealth;
 
     healthDisplay.style.width = (healthRatio * 100) + "%";
+
     healthDisplay.style.backgroundColor =
         healthRatio > 0.5 ? "#55bd68" :
         healthRatio > 0.25 ? "#e0b84f" :
         "#e34a4a";
 
-    healthDisplay.parentElement.setAttribute("aria-valuenow", player.health);
+    healthDisplay.parentElement.setAttribute(
+        "aria-valuenow",
+        player.health
+    );
 
     enemyDisplay.textContent =
         "Enemies: " + countLivingEnemies();
